@@ -4,9 +4,25 @@
 
 {% block content %}
 <h1>新規登録</h1>
-<form method="post">
+<form method="post" novalidate>
     {% csrf_token %}
-    {{ form.as_p }}
+    {% if form.non_field_errors %}
+        <div class="form-errors" role="alert">
+            {{ form.non_field_errors }}
+        </div>
+    {% endif %}
+    {% for field in form %}
+        <div class="form-field">
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% if field.help_text %}
+                <div class="help-text">{{ field.help_text }}</div>
+            {% endif %}
+            {% if field.errors %}
+                <div class="field-errors" role="alert">{{ field.errors }}</div>
+            {% endif %}
+        </div>
+    {% endfor %}
     <button type="submit">登録する</button>
 </form>
 {% endblock %}
