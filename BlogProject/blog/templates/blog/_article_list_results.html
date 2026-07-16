@@ -1,0 +1,12 @@
+{% if articles %}
+<ul class="article-list">
+    {% for article in articles %}
+        <li>
+            <div class="article-list__title">{{ article.title }}</div>
+            <div class="article-list__meta">{{ article.author.username }} ・ {{ article.created_at|date:"Y-m-d" }}</div>
+        </li>
+    {% endfor %}
+</ul>
+{% else %}
+<p class="article-list__empty">該当する記事が見つかりませんでした。</p>
+{% endif %}

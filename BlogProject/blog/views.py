@@ -1,23 +1,50 @@
 from django.contrib.auth import login as auth_login
 from django.contrib.auth import logout as auth_logout
 from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.models import User
+from django.db.models import Q
 from django.shortcuts import redirect, render
 from django.views.decorators.http import require_POST
 
 from .forms import RegisterForm
+from .models import Article
 
 
 def home(request):
     return render(request, "blog/home.html")
 
 
+def _filter_articles(request):
+    articles = Article.objects.all()
+
+    keyword = request.GET.get("q", "").strip()
+    if keyword:
+        articles = articles.filter(Q(title__icontains=keyword) | Q(content__icontains=keyword))
+
+    author_id = request.GET.get("author", "").strip()
+    if author_id:
+        articles = articles.filter(author_id=author_id)
+
+    date_value = request.GET.get("date", "").strip()
+    if date_value:
+        articles = articles.filter(created_at__date=date_value)
+
+    return articles
+
+
 def article_list(request):
-    titles = [
-        "Django入門: モデルとマイグレーション",
-        "URLとViewの配線を理解する",
-        "テンプレートで記事一覧を表示する",
-    ]
-    return render(request, "blog/article_list.html", {"titles": titles})
+    articles = _filter_articles(request)
+    authors = User.objects.filter(articles__isnull=False).distinct().order_by("username")
+    return render(
+        request,
+        "blog/article_list.html",
+        {"articles": articles, "authors": authors},
+    )
+
+
+def article_search(request):
+    articles = _filter_articles(request)
+    return render(request, "blog/_article_list_results.html", {"articles": articles})
 
 
 def article_detail(request, article_id):

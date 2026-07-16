@@ -164,3 +164,77 @@ class LogoutViewTests(TestCase):
         response = self.client.post(reverse("logout"))
 
         self.assertRedirects(response, reverse("home"))
+
+
+class ArticleSearchTests(TestCase):
+    def setUp(self):
+        self.alice = User.objects.create_user(username="alice", password="password123")
+        self.bob = User.objects.create_user(username="bob", password="password123")
+        self.htmx_article = Article.objects.create(
+            title="HTMXで作るインクリメンタル検索",
+            content="hx-get属性とhx-triggerを使った動的更新の解説。",
+            author=self.bob,
+        )
+        self.django_article = Article.objects.create(
+            title="Django入門",
+            content="モデルとマイグレーションの基本。",
+            author=self.alice,
+        )
+        Article.objects.filter(pk=self.htmx_article.pk).update(
+            created_at="2026-07-14T00:00:00Z"
+        )
+        Article.objects.filter(pk=self.django_article.pk).update(
+            created_at="2026-07-10T00:00:00Z"
+        )
+
+    def test_article_list_shows_all_articles_with_no_filters(self):
+        response = self.client.get(reverse("article_list"))
+
+        self.assertContains(response, "HTMXで作るインクリメンタル検索")
+        self.assertContains(response, "Django入門")
+
+    def test_keyword_matches_title(self):
+        response = self.client.get(reverse("article_list"), {"q": "HTMX"})
+
+        self.assertContains(response, "HTMXで作るインクリメンタル検索")
+        self.assertNotContains(response, "Django入門")
+
+    def test_keyword_matches_content(self):
+        response = self.client.get(reverse("article_list"), {"q": "マイグレーション"})
+
+        self.assertContains(response, "Django入門")
+        self.assertNotContains(response, "HTMXで作るインクリメンタル検索")
+
+    def test_keyword_no_match_shows_empty_message(self):
+        response = self.client.get(reverse("article_list"), {"q": "存在しないキーワード"})
+
+        self.assertNotContains(response, "HTMXで作るインクリメンタル検索")
+        self.assertNotContains(response, "Django入門")
+        self.assertContains(response, "該当する記事が見つかりませんでした。")
+
+    def test_author_filter(self):
+        response = self.client.get(reverse("article_list"), {"author": self.bob.id})
+
+        self.assertContains(response, "HTMXで作るインクリメンタル検索")
+        self.assertNotContains(response, "Django入門")
+
+    def test_date_filter(self):
+        response = self.client.get(reverse("article_list"), {"date": "2026-07-10"})
+
+        self.assertContains(response, "Django入門")
+        self.assertNotContains(response, "HTMXで作るインクリメンタル検索")
+
+    def test_combined_keyword_and_author_filter(self):
+        response = self.client.get(
+            reverse("article_list"), {"q": "検索", "author": self.alice.id}
+        )
+
+        self.assertNotContains(response, "HTMXで作るインクリメンタル検索")
+        self.assertNotContains(response, "Django入門")
+
+    def test_article_search_endpoint_returns_partial_only(self):
+        response = self.client.get(reverse("article_search"), {"q": "HTMX"})
+
+        self.assertContains(response, "HTMXで作るインクリメンタル検索")
+        self.assertNotContains(response, "<html")
+        self.assertNotContains(response, "記事一覧")

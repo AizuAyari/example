@@ -198,3 +198,39 @@ form {
   border-radius: var(--radius);
   padding: var(--space-4);
 }
+
+/* Article search / filters ------------------------------------------------ */
+.article-filters {
+  max-width: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.article-filters .form-field {
+  flex: 1 1 12rem;
+  margin-bottom: 0;
+}
+
+.article-filters select {
+  width: 100%;
+  padding: var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  font: inherit;
+}
+
+.article-list__title {
+  font-weight: 600;
+}
+
+.article-list__meta {
+  color: var(--color-muted);
+  font-size: 0.875rem;
+  margin-top: var(--space-1);
+}
+
+.article-list__empty {
+  color: var(--color-muted);
+}
