@@ -4,9 +4,36 @@
 
 {% block content %}
 <h1>記事一覧</h1>
-<ul class="article-list">
-    {% for title in titles %}
-        <li>{{ title }}</li>
-    {% endfor %}
-</ul>
+
+<form
+    class="article-filters"
+    method="get"
+    action="{% url 'article_list' %}"
+    hx-get="{% url 'article_search' %}"
+    hx-target="#article-results"
+    hx-swap="innerHTML"
+    hx-trigger="input changed delay:300ms, change"
+>
+    <div class="form-field">
+        <label for="id_q">キーワード</label>
+        <input type="text" id="id_q" name="q" value="{{ request.GET.q }}" placeholder="タイトル・本文から検索">
+    </div>
+    <div class="form-field">
+        <label for="id_author">著者</label>
+        <select id="id_author" name="author">
+            <option value="">すべて</option>
+            {% for author in authors %}
+                <option value="{{ author.id }}" {% if request.GET.author == author.id|stringformat:"s" %}selected{% endif %}>{{ author.username }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="form-field">
+        <label for="id_date">投稿日</label>
+        <input type="date" id="id_date" name="date" value="{{ request.GET.date }}">
+    </div>
+</form>
+
+<div id="article-results">
+    {% include "blog/_article_list_results.html" %}
+</div>
 {% endblock %}
