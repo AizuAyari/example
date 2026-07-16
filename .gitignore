@@ -13,3 +13,9 @@ htmlcov/
 
 # uv
 .python-version
+
+# Environment variables
+.env
+
+# Collected static files
+staticfiles/
