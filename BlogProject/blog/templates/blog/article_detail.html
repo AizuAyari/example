@@ -1,10 +1,11 @@
 {% extends "blog/base.html" %}
 
-{% block title %}記事詳細 - The Blogs{% endblock %}
+{% block title %}{{ article.title }} - The Blogs{% endblock %}
 
 {% block content %}
 <article class="article-detail">
-    <h1>記事詳細</h1>
-    <p>記事ID: {{ article_id }} の詳細表示</p>
+    <h1>{{ article.title }}</h1>
+    <div class="article-list__meta">{{ article.author.username }} ・ {{ article.created_at|date:"Y-m-d" }}</div>
+    <p>{{ article.content|linebreaks }}</p>
 </article>
 {% endblock %}
