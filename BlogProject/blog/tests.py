@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User
 from django.db import IntegrityError
 from django.test import TestCase
+from django.urls import reverse
 
 from .models import Article, Keyword
 
@@ -66,3 +67,100 @@ class KeywordModelTests(TestCase):
     def test_str_returns_keyword_text(self):
         keyword = Keyword.objects.create(keyword_text="django", article=self.article)
         self.assertEqual(str(keyword), "django")
+
+
+class RegisterViewTests(TestCase):
+    def test_valid_registration_creates_user_and_logs_in(self):
+        response = self.client.post(
+            reverse("register"),
+            {"username": "newuser", "password1": "StrongPass!2026", "password2": "StrongPass!2026"},
+        )
+
+        self.assertRedirects(response, reverse("home"))
+        self.assertTrue(User.objects.filter(username="newuser").exists())
+        self.assertIn("_auth_user_id", self.client.session)
+
+    def test_password_mismatch_does_not_create_user(self):
+        response = self.client.post(
+            reverse("register"),
+            {"username": "newuser", "password1": "StrongPass!2026", "password2": "DifferentPass!2026"},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(User.objects.filter(username="newuser").exists())
+        self.assertFalse(response.wsgi_request.user.is_authenticated)
+
+    def test_duplicate_username_does_not_create_second_user(self):
+        User.objects.create_user(username="existinguser", password="password123")
+
+        response = self.client.post(
+            reverse("register"),
+            {"username": "existinguser", "password1": "StrongPass!2026", "password2": "StrongPass!2026"},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(User.objects.filter(username="existinguser").count(), 1)
+
+    def test_get_request_renders_empty_form(self):
+        response = self.client.get(reverse("register"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "<form")
+
+
+class LoginViewTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username="testuser", password="CorrectPass!2026")
+
+    def test_valid_credentials_log_in_and_redirect(self):
+        response = self.client.post(
+            reverse("login"),
+            {"username": "testuser", "password": "CorrectPass!2026"},
+        )
+
+        self.assertRedirects(response, reverse("home"))
+        self.assertIn("_auth_user_id", self.client.session)
+
+    def test_invalid_password_does_not_log_in(self):
+        response = self.client.post(
+            reverse("login"),
+            {"username": "testuser", "password": "WrongPass!2026"},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn("_auth_user_id", self.client.session)
+
+    def test_nonexistent_user_does_not_log_in(self):
+        response = self.client.post(
+            reverse("login"),
+            {"username": "nouser", "password": "WhoKnows!2026"},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn("_auth_user_id", self.client.session)
+
+
+class LogoutViewTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username="testuser", password="CorrectPass!2026")
+
+    def test_post_while_logged_in_logs_out_and_redirects(self):
+        self.client.login(username="testuser", password="CorrectPass!2026")
+
+        response = self.client.post(reverse("logout"))
+
+        self.assertRedirects(response, reverse("home"))
+        self.assertNotIn("_auth_user_id", self.client.session)
+
+    def test_get_request_is_not_allowed(self):
+        self.client.login(username="testuser", password="CorrectPass!2026")
+
+        response = self.client.get(reverse("logout"))
+
+        self.assertEqual(response.status_code, 405)
+        self.assertIn("_auth_user_id", self.client.session)
+
+    def test_logout_while_not_logged_in_still_redirects(self):
+        response = self.client.post(reverse("logout"))
+
+        self.assertRedirects(response, reverse("home"))
