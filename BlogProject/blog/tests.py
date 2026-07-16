@@ -238,3 +238,71 @@ class ArticleSearchTests(TestCase):
         self.assertContains(response, "HTMXで作るインクリメンタル検索")
         self.assertNotContains(response, "<html")
         self.assertNotContains(response, "記事一覧")
+
+
+class ArticleCreateViewTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username="writer", password="WriterPass!2026")
+
+    def test_anonymous_user_is_redirected_to_login(self):
+        response = self.client.get(reverse("article_create"))
+
+        self.assertRedirects(
+            response, f"{reverse('login')}?next={reverse('article_create')}"
+        )
+        self.assertEqual(Article.objects.count(), 0)
+
+    def test_authenticated_user_can_create_article(self):
+        self.client.login(username="writer", password="WriterPass!2026")
+
+        response = self.client.post(
+            reverse("article_create"),
+            {"title": "New Article", "content": "Some content."},
+        )
+
+        article = Article.objects.get(title="New Article")
+        self.assertRedirects(response, reverse("article_detail", args=[article.id]))
+        self.assertEqual(article.content, "Some content.")
+
+    def test_author_is_always_the_logged_in_user(self):
+        self.client.login(username="writer", password="WriterPass!2026")
+
+        self.client.post(
+            reverse("article_create"),
+            {"title": "New Article", "content": "Some content.", "author": "999"},
+        )
+
+        article = Article.objects.get(title="New Article")
+        self.assertEqual(article.author, self.user)
+
+    def test_empty_title_shows_validation_error_and_creates_nothing(self):
+        self.client.login(username="writer", password="WriterPass!2026")
+
+        response = self.client.post(
+            reverse("article_create"),
+            {"title": "", "content": "Some content."},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(Article.objects.count(), 0)
+        self.assertContains(response, "field-errors")
+
+
+class ArticleDetailViewTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username="writer", password="WriterPass!2026")
+        self.article = Article.objects.create(
+            title="Existing Article", content="Existing content.", author=self.user
+        )
+
+    def test_existing_article_is_displayed(self):
+        response = self.client.get(reverse("article_detail", args=[self.article.id]))
+
+        self.assertContains(response, "Existing Article")
+        self.assertContains(response, "Existing content.")
+        self.assertContains(response, "writer")
+
+    def test_nonexistent_article_returns_404(self):
+        response = self.client.get(reverse("article_detail", args=[99999]))
+
+        self.assertEqual(response.status_code, 404)
