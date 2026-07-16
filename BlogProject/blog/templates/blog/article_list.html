@@ -3,7 +3,10 @@
 {% block title %}記事一覧 - The Blogs{% endblock %}
 
 {% block content %}
-{% for title in titles %}
-    <p>{{ title }}</p>
-{% endfor %}
+<h1>記事一覧</h1>
+<ul class="article-list">
+    {% for title in titles %}
+        <li>{{ title }}</li>
+    {% endfor %}
+</ul>
 {% endblock %}

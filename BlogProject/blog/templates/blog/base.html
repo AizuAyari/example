@@ -1,23 +1,28 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}The Blogs{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'blog/css/style.css' %}">
 </head>
 <body>
-    <header>
-        <nav>
-            <a href="{% url 'home' %}">The Blogs</a>
-            {% if user.is_authenticated %}
-                <span>ようこそ、{{ user.username }} さん</span>
-                <form method="post" action="{% url 'logout' %}" style="display:inline;">
-                    {% csrf_token %}
-                    <button type="submit">ログアウト</button>
-                </form>
-            {% else %}
-                <a href="{% url 'login' %}">ログイン</a>
-                <a href="{% url 'register' %}">新規登録</a>
-            {% endif %}
+    <header class="site-header">
+        <nav class="site-nav" aria-label="メインナビゲーション">
+            <a class="site-nav__brand" href="{% url 'home' %}">The Blogs</a>
+            <div class="site-nav__links">
+                {% if user.is_authenticated %}
+                    <span class="site-nav__welcome">ようこそ、{{ user.username }} さん</span>
+                    <form class="site-nav__logout-form" method="post" action="{% url 'logout' %}">
+                        {% csrf_token %}
+                        <button type="submit">ログアウト</button>
+                    </form>
+                {% else %}
+                    <a href="{% url 'login' %}">ログイン</a>
+                    <a href="{% url 'register' %}">新規登録</a>
+                {% endif %}
+            </div>
         </nav>
     </header>
 
