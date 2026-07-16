@@ -1,0 +1,9 @@
+{% extends "blog/base.html" %}
+
+{% block title %}記事一覧 - The Blogs{% endblock %}
+
+{% block content %}
+{% for title in titles %}
+    <p>{{ title }}</p>
+{% endfor %}
+{% endblock %}
