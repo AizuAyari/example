@@ -26,7 +26,7 @@ uv run main.py
 
 This project is prepared for a production-ready environment and is successfully deployed on **Render.com**.
 
-- **Live Demo URL:** [https://the-blogs.onrender.com](https://the-blogs.onrender.com) (replace with your actual deployed URL)
+- **Live Demo URL:** [https://the-blogs.onrender.com](https://the-blogs.onrender.com)
 
 ### Environment Variables
 
