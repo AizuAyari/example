@@ -2,7 +2,7 @@
 <ul class="article-list">
     {% for article in articles %}
         <li>
-            <div class="article-list__title">{{ article.title }}</div>
+            <a class="article-list__title" href="{% url 'article_detail' article.id %}">{{ article.title }}</a>
             <div class="article-list__meta">{{ article.author.username }} ・ {{ article.created_at|date:"Y-m-d" }}</div>
         </li>
     {% endfor %}
