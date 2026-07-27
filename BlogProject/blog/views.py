@@ -12,7 +12,8 @@ from .models import Article
 
 
 def home(request):
-    return render(request, "blog/home.html")
+    recent_articles = Article.objects.select_related("author")[:3]
+    return render(request, "blog/home.html", {"recent_articles": recent_articles})
 
 
 def _filter_articles(request):
