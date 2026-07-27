@@ -139,6 +139,21 @@ main {
   padding: var(--space-4) var(--space-3);
 }
 
+/* Home page ------------------------------------------------------------ */
+.home-hero {
+  margin-bottom: var(--space-5);
+}
+
+.home-hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.home-recent h2 {
+  margin-bottom: var(--space-3);
+}
+
 /* Footer -------------------------------------------------------------- */
 .site-footer {
   max-width: var(--max-width);
@@ -163,6 +178,17 @@ button,
   border-radius: var(--radius);
   padding: var(--space-2) var(--space-4);
   cursor: pointer;
+}
+
+.button--outline {
+  background: transparent;
+  color: var(--color-accent);
+  border: 1px solid var(--color-accent);
+}
+
+.button--outline:hover {
+  background: var(--color-accent);
+  color: #ffffff;
 }
 
 button:hover,
