@@ -19,3 +19,6 @@ htmlcov/
 
 # Collected static files
 staticfiles/
+
+# Database
+db.sqlite3
