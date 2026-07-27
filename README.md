@@ -76,14 +76,14 @@ Security-related settings are externalized as environment variables via `django-
 - **Root Directory:** `BlogProject`
 - **Build Command:**
   ```bash
-  pip install -r requirements.txt && python manage.py migrate && python manage.py collectstatic --noinput
+  pip install -r requirements.txt && python manage.py migrate --noinput && python manage.py seed_articles && python manage.py collectstatic --noinput
   ```
 - **Start Command:** (runs Gunicorn as the WSGI server)
   ```bash
-  gunicorn BlogProject.wsgi:application --bind 0.0.0.0:$PORT
+  gunicorn BlogProject.wsgi:application
   ```
 
 ### Production Constraints & Future Plans
 
 - **Static files:** served directly within the Django process via the WhiteNoise middleware
-- **SQLite limitation:** currently uses `db.sqlite3`, but since Render's free instance has an ephemeral filesystem, data resets on every redeploy. Migrating to an external database such as Render PostgreSQL is planned for a permanent production setup.
+- **SQLite limitation:** `db.sqlite3` is no longer committed to the repo (it shouldn't be — it's a runtime artifact). Since Render's free instance has an ephemeral filesystem, every deploy starts from an empty database, so the build command runs `migrate` to create the schema and `seed_articles` (idempotent, via `get_or_create`) to repopulate demo articles. Migrating to a persistent external database such as Render PostgreSQL is planned for a permanent production setup.
