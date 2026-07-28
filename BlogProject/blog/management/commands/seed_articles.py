@@ -10,7 +10,10 @@ SAMPLE_ARTICLES = [
     {
         "username": "alice",
         "title": "Django入門: モデルとマイグレーション",
-        "content": "Djangoのモデル定義からマイグレーション実行までを解説する記事です。ORMの基本を扱います。",
+        "content": (
+            "Djangoのモデル定義からマイグレーション実行までを解説する記事です。"
+            "ORMの基本を扱います。"
+        ),
         "days_ago": 10,
     },
     {
@@ -28,13 +31,19 @@ SAMPLE_ARTICLES = [
     {
         "username": "bob",
         "title": "HTMXで作るインクリメンタル検索",
-        "content": "HTMXのhx-get属性とhx-triggerを使い、ページ全体をリロードせずに検索結果を更新する方法を解説します。",
+        "content": (
+            "HTMXのhx-get属性とhx-triggerを使い、"
+            "ページ全体をリロードせずに検索結果を更新する方法を解説します。"
+        ),
         "days_ago": 2,
     },
     {
         "username": "bob",
         "title": "レスポンシブデザインとアクセシビリティの基礎",
-        "content": "メディアクエリによるレスポンシブ対応と、フォーカス表示やコントラスト比などのアクセシビリティ配慮を紹介します。",
+        "content": (
+            "メディアクエリによるレスポンシブ対応と、"
+            "フォーカス表示やコントラスト比などのアクセシビリティ配慮を紹介します。"
+        ),
         "days_ago": 1,
     },
 ]
@@ -66,8 +75,6 @@ class Command(BaseCommand):
                 Article.objects.filter(pk=article.pk).update(created_at=created_at)
                 created_count += 1
 
-        self.stdout.write(
-            self.style.SUCCESS(
-                f"Seeded {created_count} new article(s); {len(SAMPLE_ARTICLES) - created_count} already existed."
-            )
-        )
+        skipped_count = len(SAMPLE_ARTICLES) - created_count
+        message = f"Seeded {created_count} new article(s); {skipped_count} already existed."
+        self.stdout.write(self.style.SUCCESS(message))

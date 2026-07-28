@@ -83,7 +83,11 @@ class RegisterViewTests(TestCase):
     def test_password_mismatch_does_not_create_user(self):
         response = self.client.post(
             reverse("register"),
-            {"username": "newuser", "password1": "StrongPass!2026", "password2": "DifferentPass!2026"},
+            {
+                "username": "newuser",
+                "password1": "StrongPass!2026",
+                "password2": "DifferentPass!2026",
+            },
         )
 
         self.assertEqual(response.status_code, 200)
@@ -95,7 +99,11 @@ class RegisterViewTests(TestCase):
 
         response = self.client.post(
             reverse("register"),
-            {"username": "existinguser", "password1": "StrongPass!2026", "password2": "StrongPass!2026"},
+            {
+                "username": "existinguser",
+                "password1": "StrongPass!2026",
+                "password2": "StrongPass!2026",
+            },
         )
 
         self.assertEqual(response.status_code, 200)
@@ -287,6 +295,50 @@ class ArticleCreateViewTests(TestCase):
         self.assertEqual(Article.objects.count(), 0)
         self.assertContains(response, "field-errors")
 
+    def test_keywords_are_saved_with_the_article(self):
+        self.client.login(username="writer", password="WriterPass!2026")
+
+        self.client.post(
+            reverse("article_create"),
+            {"title": "New Article", "content": "Some content.", "keywords": "django, htmx"},
+        )
+
+        article = Article.objects.get(title="New Article")
+        self.assertEqual(
+            set(article.keywords.values_list("keyword_text", flat=True)),
+            {"django", "htmx"},
+        )
+
+    def test_blank_keywords_creates_no_keyword_records(self):
+        self.client.login(username="writer", password="WriterPass!2026")
+
+        self.client.post(
+            reverse("article_create"),
+            {"title": "New Article", "content": "Some content.", "keywords": ""},
+        )
+
+        article = Article.objects.get(title="New Article")
+        self.assertEqual(article.keywords.count(), 0)
+
+    def test_blank_and_duplicate_keyword_entries_are_not_saved_separately(self):
+        self.client.login(username="writer", password="WriterPass!2026")
+
+        self.client.post(
+            reverse("article_create"),
+            {
+                "title": "New Article",
+                "content": "Some content.",
+                "keywords": "django,, django , htmx,",
+            },
+        )
+
+        article = Article.objects.get(title="New Article")
+        self.assertEqual(
+            set(article.keywords.values_list("keyword_text", flat=True)),
+            {"django", "htmx"},
+        )
+        self.assertEqual(article.keywords.count(), 2)
+
 
 class ArticleDetailViewTests(TestCase):
     def setUp(self):
@@ -306,3 +358,17 @@ class ArticleDetailViewTests(TestCase):
         response = self.client.get(reverse("article_detail", args=[99999]))
 
         self.assertEqual(response.status_code, 404)
+
+    def test_keywords_are_displayed(self):
+        Keyword.objects.create(article=self.article, keyword_text="django")
+        Keyword.objects.create(article=self.article, keyword_text="htmx")
+
+        response = self.client.get(reverse("article_detail", args=[self.article.id]))
+
+        self.assertContains(response, "django")
+        self.assertContains(response, "htmx")
+
+    def test_no_keyword_list_rendered_when_article_has_no_keywords(self):
+        response = self.client.get(reverse("article_detail", args=[self.article.id]))
+
+        self.assertNotContains(response, "article-detail__keywords")

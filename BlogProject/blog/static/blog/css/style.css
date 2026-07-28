@@ -273,6 +273,23 @@ form {
   padding: var(--space-4);
 }
 
+.article-detail__keywords {
+  list-style: none;
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.keyword-tag {
+  background: var(--color-border);
+  color: var(--color-text);
+  border-radius: var(--radius);
+  padding: var(--space-1) var(--space-2);
+  font-size: 0.875rem;
+}
+
 /* Article search / filters ------------------------------------------------ */
 .article-filters {
   max-width: none;
