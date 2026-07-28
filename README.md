@@ -55,7 +55,7 @@ pytest
 
 ## Specs
 
-Design decisions and acceptance criteria for each feature live under `BlogProject/openspec/specs/` (`article-creation`, `article-search`, `interface-design`, `production-deployment`, `user-auth`).
+Design decisions and acceptance criteria for each feature live under `BlogProject/openspec/specs/` (`blog-article`, `blog-keyword`, `blog-user`, `article-creation`, `article-search`, `interface-design`, `production-deployment`, `user-auth`).
 
 ## Deployment (Render.com)
 

@@ -8,7 +8,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
 from .forms import ArticleForm, RegisterForm
-from .models import Article
+from .models import Article, Keyword
 
 
 def home(request):
@@ -54,6 +54,17 @@ def article_detail(request, article_id):
     return render(request, "blog/article_detail.html", {"article": article})
 
 
+def _parse_keywords(raw_keywords):
+    seen = set()
+    keywords = []
+    for entry in raw_keywords.split(","):
+        keyword = entry.strip()
+        if keyword and keyword not in seen:
+            seen.add(keyword)
+            keywords.append(keyword)
+    return keywords
+
+
 @login_required(login_url="login")
 def article_create(request):
     if request.method == "POST":
@@ -62,6 +73,8 @@ def article_create(request):
             article = form.save(commit=False)
             article.author = request.user
             article.save()
+            for keyword in _parse_keywords(form.cleaned_data["keywords"]):
+                Keyword.objects.create(article=article, keyword_text=keyword)
             return redirect("article_detail", article_id=article.id)
     else:
         form = ArticleForm()

@@ -7,5 +7,12 @@
     <h1>{{ article.title }}</h1>
     <div class="article-list__meta">{{ article.author.username }} ・ {{ article.created_at|date:"Y-m-d" }}</div>
     <p>{{ article.content|linebreaks }}</p>
+    {% if article.keywords.all %}
+        <ul class="article-detail__keywords">
+            {% for keyword in article.keywords.all %}
+                <li class="keyword-tag">{{ keyword.keyword_text }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
 </article>
 {% endblock %}

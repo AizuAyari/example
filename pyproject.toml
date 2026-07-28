@@ -9,3 +9,11 @@ dependencies = [
     "pytest-cov>=7.1.0",
     "ruff>=0.15.18",
 ]
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+exclude = ["**/migrations/*", "main.py", "example.py"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]

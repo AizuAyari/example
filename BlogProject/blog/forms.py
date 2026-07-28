@@ -12,6 +12,11 @@ class RegisterForm(UserCreationForm):
 
 
 class ArticleForm(forms.ModelForm):
+    keywords = forms.CharField(
+        required=False,
+        help_text="カンマ区切りで入力してください（例: django, htmx）",
+    )
+
     class Meta:
         model = Article
         fields = ["title", "content"]
